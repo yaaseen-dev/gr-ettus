@@ -12,7 +12,7 @@ gr_modtools structure.
 
 
 RFNoC Gain OOT module from "Getting Started with RFNoC" was created using this branch and was verified to be working with gnuradio 3.8.
-One expection is that rfnocmodtools by defaule generates only xml for grc, but gnuradio 3.8 uses yaml bindings. 
+One expection is that rfnocmodtools by default generates only xml for grc, but gnuradio 3.8 uses yaml bindings. 
 Hence this yaml file needs to be created manually (this can be easily done by looking at the already created rfnoc custom modules from gr-ettus/grc/ location)
 
 Ideally entire rfnocmodtools structure should be updated including the python template 
