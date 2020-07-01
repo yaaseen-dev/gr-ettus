@@ -20,7 +20,7 @@
 ########################################################################
 # Project setup
 ########################################################################
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.8)
 project(gr-rfnoc_example CXX C)
 enable_testing()
 
@@ -43,15 +43,47 @@ set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 #make sure our local CMake Modules path comes first
 list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
+# Set the version information here
+set(VERSION_MAJOR 3)
+set(VERSION_API   8)
+set(VERSION_ABI   0)
+set(VERSION_PATCH git)
+
+cmake_policy(SET CMP0011 NEW)
+
+# Enable generation of compile_commands.json for code completion engines
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 
 ########################################################################
 # Compiler specific setup
 ########################################################################
-if(CMAKE_COMPILER_IS_GNUCXX AND NOT WIN32)
+if((CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+    CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    AND NOT WIN32)
     #http://gcc.gnu.org/wiki/Visibility
     add_definitions(-fvisibility=hidden)
-    add_definitions(-std=c++11)
 endif()
+
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    SET(CMAKE_CXX_STANDARD 11)
+ELSEIF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    SET(CMAKE_CXX_STANDARD 11)
+ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    SET(CMAKE_CXX_STANDARD 11)
+ELSE()
+    message(WARNING "C++ standard could not be set because compiler is not GNU, Clang or MSVC.")
+ENDIF()
+
+IF(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    SET(CMAKE_C_STANDARD 11)
+ELSEIF(CMAKE_C_COMPILER_ID MATCHES "Clang")
+    SET(CMAKE_C_STANDARD 11)
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    SET(CMAKE_C_STANDARD 11)
+ELSE()
+    message(WARNING "C standard could not be set because compiler is not GNU, Clang or MSVC.")
+ENDIF()
 
 ########################################################################
 # Find boost
@@ -77,19 +109,21 @@ endif()
 ########################################################################
 # Install directories
 ########################################################################
+find_package(Gnuradio "3.8" REQUIRED)
+include(GrVersion)
+
 include(GrPlatform) #define LIB_SUFFIX
-set(GR_RUNTIME_DIR      bin)
-set(GR_LIBRARY_DIR      lib${LIB_SUFFIX})
+
+if(NOT CMAKE_MODULES_DIR)
+  set(CMAKE_MODULES_DIR lib${LIB_SUFFIX}/cmake)
+endif(NOT CMAKE_MODULES_DIR)
+
 set(GR_INCLUDE_DIR      include/rfnoc_example)
-set(GR_DATA_DIR         share)
+set(GR_CMAKE_DIR        ${CMAKE_MODULES_DIR}/rfnoc_example)
 set(GR_PKG_DATA_DIR     ${GR_DATA_DIR}/${CMAKE_PROJECT_NAME})
-set(GR_DOC_DIR          ${GR_DATA_DIR}/doc)
 set(GR_PKG_DOC_DIR      ${GR_DOC_DIR}/${CMAKE_PROJECT_NAME})
-set(GR_CONF_DIR         etc)
 set(GR_PKG_CONF_DIR     ${GR_CONF_DIR}/${CMAKE_PROJECT_NAME}/conf.d)
-set(GR_LIBEXEC_DIR      libexec)
 set(GR_PKG_LIBEXEC_DIR  ${GR_LIBEXEC_DIR}/${CMAKE_PROJECT_NAME})
-set(GRC_BLOCKS_DIR      ${GR_PKG_DATA_DIR}/grc/blocks)
 
 ########################################################################
 # On Apple only, set install name and use rpath correctly, if not already set
@@ -114,16 +148,7 @@ endif(APPLE)
 ########################################################################
 # Find gnuradio build dependencies
 ########################################################################
-find_package(CppUnit)
 find_package(Doxygen)
-
-# Search for GNU Radio and its components and versions. Add any
-# components required to the list of GR_REQUIRED_COMPONENTS (in all
-# caps such as FILTER or FFT) and change the version to the minimum
-# API compatible version required.
-set(GR_REQUIRED_COMPONENTS RUNTIME)
-find_package(Gnuradio "3.7.2" REQUIRED)
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 ########################################################################
 # Setup doxygen option
@@ -201,10 +226,6 @@ add_subdirectory(rfnoc/testbenches)
 ########################################################################
 # Install cmake search helper for this library
 ########################################################################
-if(NOT CMAKE_MODULES_DIR)
-  set(CMAKE_MODULES_DIR lib${LIB_SUFFIX}/cmake)
-endif(NOT CMAKE_MODULES_DIR)
-
 install(FILES cmake/Modules/rfnoc_exampleConfig.cmake
     DESTINATION ${CMAKE_MODULES_DIR}/rfnoc_example
 )

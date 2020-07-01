@@ -32,7 +32,8 @@ def print_class_descriptions():
     for gvar in globals().values():
         try:
             if issubclass(gvar, ModTool) and not issubclass(gvar, ModToolHelp):
-                desclist.append((gvar.name, ','.join(gvar.aliases), gvar.__doc__))
+                desclist.append(
+                    (gvar.name, ','.join(gvar.aliases), gvar.__doc__))
         except (TypeError, AttributeError):
             pass
     print('Name      Aliases          Description')
@@ -61,7 +62,7 @@ class ModToolHelp(ModTool):
 
     def run(self):
         cmd_dict = get_class_dict(globals().values())
-        cmds = cmd_dict.keys()
+        cmds = list(cmd_dict)
         cmds.remove(self.name)
         for alias in self.aliases:
             cmds.remove(alias)

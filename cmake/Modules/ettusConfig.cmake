@@ -24,7 +24,7 @@ FIND_LIBRARY(
           /usr/lib64
           )
 
-include("${CMAKE_CURRENT_LIST_DIR}/ettusTarget.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/gnuradio-ettusTargets.cmake")
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ETTUS DEFAULT_MSG ETTUS_LIBRARIES ETTUS_INCLUDE_DIRS)

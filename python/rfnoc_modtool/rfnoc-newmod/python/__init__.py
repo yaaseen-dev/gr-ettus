@@ -26,7 +26,7 @@ description here (python/__init__.py).
 # import swig generated symbols into the rfnoc_example namespace
 try:
 	# this might fail if the module is python-only
-	from rfnoc_example_swig import *
+	from .rfnoc_example_swig import *
 except ImportError:
 	pass
 

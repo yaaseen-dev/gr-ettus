@@ -32,7 +32,11 @@ if(NOT rfnoc_example_sources)
 endif(NOT rfnoc_example_sources)
 
 add_library(gnuradio-rfnoc_example SHARED ${rfnoc_example_sources})
-target_link_libraries(gnuradio-rfnoc_example ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES} ${ETTUS_LIBRARIES})
+target_link_libraries(gnuradio-rfnoc_example gnuradio::gnuradio-runtime gnuradio::gnuradio-ettus)
+target_include_directories(gnuradio-rfnoc_example
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    PUBLIC $<INSTALL_INTERFACE:include>
+  )
 set_target_properties(gnuradio-rfnoc_example PROPERTIES DEFINE_SYMBOL "gnuradio_rfnoc_example_EXPORTS")
 
 if(APPLE)
@@ -44,42 +48,29 @@ endif(APPLE)
 ########################################################################
 # Install built library files
 ########################################################################
-install(TARGETS gnuradio-rfnoc_example
-    LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
-    ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
-    RUNTIME DESTINATION bin              # .dll file
-)
+include(GrMiscUtils)
+GR_LIBRARY_FOO(gnuradio-rfnoc_example)
 
 ########################################################################
 # Build and register unit test
 ########################################################################
-if(CPPUNIT_FOUND)
+include(GrTest)
 
-    include(GrTest)
+# If your unit tests require special include paths, add them here
+#include_directories()
+# List all files that contain Boost.UTF unit tests here
+list(APPEND test_rfnoc_example_sources
+)
+# Anything we need to link to for the unit tests go here
+list(APPEND GR_TEST_TARGET_DEPS gnuradio-rfnoc_example)
 
-    include_directories(${CPPUNIT_INCLUDE_DIRS})
+if(NOT test_rfnoc_example_sources)
+    MESSAGE(STATUS "No C++ unit tests... skipping")
+    return()
+endif(NOT test_rfnoc_example_sources)
 
-    link_directories(${CPPUNIT_LIBRARY_DIRS})
-
-    list(APPEND test_rfnoc_example_sources
-        ${CMAKE_CURRENT_SOURCE_DIR}/test_rfnoc_example.cc
-        ${CMAKE_CURRENT_SOURCE_DIR}/qa_rfnoc_example.cc
+foreach(qa_file ${test_rfnoc_example_sources})
+    GR_ADD_CPP_TEST("rfnoc_example_${qa_file}"
+        ${CMAKE_CURRENT_SOURCE_DIR}/${qa_file}
     )
-
-    add_executable(test-rfnoc_example ${test_rfnoc_example_sources})
-
-    target_link_libraries(
-        test-rfnoc_example
-        ${GNURADIO_RUNTIME_LIBRARIES}
-        ${Boost_LIBRARIES}
-        ${CPPUNIT_LIBRARIES}
-        ${ETTUS_LIBRARIES}
-        ${PC_ETTUS_LIBDIR}
-        gnuradio-rfnoc_example
-    )
-
-    GR_ADD_TEST(test_rfnoc_example test-rfnoc_example)
-
-else(CPPUNIT_FOUND)
-    message(WARNING "Disabling unit tests: No CppUnit found.")
-endif(CPPUNIT_FOUND)
+endforeach(qa_file)
