@@ -9,3 +9,20 @@ in this package. A quick listing of the details can be found in Python
 after importing by using:
 
     help(ettus)
+
+
+This branch is taken from the maint-3.8 branch of the gr-ettus git repo.
+
+Even though the maint-3.8 branch of gr-ettus was, able to compile and build with gnuradio 3.8 version.
+Create, building and installing RFNoC modules(which was done using rfnocmodtools) was not functional. 
+And also gr-ettus module itself, had some additional errors.
+
+This working-maint-3.8 branch is an attempt to solve most of those issue. The rfnocmodtools package in
+this branch has been modifiled to complie, build and install the RFNoC OOT modules. 
+
+Most of the changes made was around cmake files, doxygen subdirectory and was heavily borrowed from
+gr_modtools structure. 
+
+Ideally entire rfnocmodtools structure should be updated including the python template 
+generation files similar to gr_modtools    
+
